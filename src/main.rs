@@ -8,6 +8,7 @@ use bevy::{
     prelude::*,
     sprite::collide_aabb::{collide, Collision},
 };
+use bevy_inspector_egui::WorldInspectorPlugin;
 
 // Defines the amount of time that should elapse between each physics step.
 const TIME_STEP: f32 = 1.0 / 60.0;
@@ -48,7 +49,7 @@ const SCOREBOARD_TEXT_PADDING: Val = Val::Px(5.0);
 
 const BACKGROUND_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
 const PADDLE_COLOR: Color = Color::rgb(0.3, 0.3, 0.7);
-const BALL_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
+const BALL_COLOR: Color = Color::rgb(1.0, 1., 0.5);
 const BRICK_COLOR: Color = Color::rgb(0.5, 0.5, 1.0);
 const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 const TEXT_COLOR: Color = Color::rgb(0.5, 0.5, 1.0);
@@ -57,6 +58,7 @@ const SCORE_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugin(WorldInspectorPlugin::new())
         .insert_resource(Scoreboard { score: 0 })
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_startup_system(setup)
@@ -90,6 +92,7 @@ struct Brick;
 // This bundle is a collection of the components that define a "wall" in our game
 #[derive(Bundle)]
 struct WallBundle {
+    name: Name,
     // You can nest bundles inside of other bundles like this
     // Allowing you to compose their functionality
     #[bundle]
@@ -136,6 +139,7 @@ impl WallBundle {
     // making our code easier to read and less prone to bugs when we change the logic
     fn new(location: WallLocation) -> WallBundle {
         WallBundle {
+            name: Name::new("Wall"),
             sprite_bundle: SpriteBundle {
                 transform: Transform {
                     // We need to convert our Vec2 into a Vec3, by giving it a z-coordinate
@@ -192,6 +196,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Ball
     commands
         .spawn()
+        .insert(Name::new("Ball"))
         .insert(Ball)
         .insert_bundle(SpriteBundle {
             transform: Transform {

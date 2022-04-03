@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.6.1", default-features=true ,features = ["dynamic"] }
+bevy = { version = "0.6", default-features=true ,features = ["dynamic"] }
 bevy_ecs_ldtk = "0.2.0"
 heron = { version = "2.3.0", features = ["2d"] }
+bevy-inspector-egui = "0.8"
