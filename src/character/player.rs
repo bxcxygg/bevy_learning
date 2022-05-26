@@ -142,10 +142,6 @@ pub(crate) fn spawn_player(
             // lock the player body rotation.
             LockedAxes::ROTATION_LOCKED,
             Velocity::default(),
-            // player acceleration.
-            ExternalForce::default(),
-            // player friction.
-            Damping::default(),
         ))
         // spawn player collision bundle as children entity.
         .with_children(|children| {
