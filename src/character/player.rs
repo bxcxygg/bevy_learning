@@ -1,16 +1,11 @@
 use crate::animation_tree::*;
-use crate::components::{AnimationTimer, InputVector};
-use benimator::SpriteSheetAnimation;
+use crate::components::InputVector;
+use benimator::{Play, SpriteSheetAnimation};
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 use std::time::Duration;
-
-const RUN_ANIMATION_LEN: f32 = 0.6;
-const ROLL_ANIMATION_LEN: f32 = 0.5;
-const ATTACK_ANIMATION_LEN: f32 = 0.4;
-const IDLE_ANIMATION_LEN: f32 = 0.1;
 
 #[derive(Default, Eq, PartialEq, Clone, Inspectable)]
 enum PlayerState {
@@ -134,7 +129,6 @@ pub(crate) fn spawn_player(
             InputVector::default(),
             // player animation.
             create_animate(assets),
-            AnimationTimer(Timer::from_seconds(IDLE_ANIMATION_LEN, false)),
         ))
         // spawn player rigid body bundle.
         .insert_bundle((
@@ -159,11 +153,10 @@ pub(crate) fn movement(
         &mut AnimationTree,
         &mut InputVector,
         &mut Velocity,
-        &mut AnimationTimer,
         &mut Player,
     )>,
 ) {
-    let (mut animation, mut vector, mut velocity, mut timer, player) = query.single_mut();
+    let (mut animation, mut vector, mut velocity, player) = query.single_mut();
 
     if player.state == PlayerState::MOVE {
         let mut input_vector = Vec2::ZERO;
@@ -184,17 +177,9 @@ pub(crate) fn movement(
             vector.0 = input_vector.normalize();
 
             animation.travel(vector.0, "run".to_string());
-            timer
-                .0
-                .set_duration(Duration::from_secs_f32(RUN_ANIMATION_LEN));
-            timer.0.reset();
             velocity.linvel = vector.0 * 80.;
         } else {
             animation.travel(vector.0, "idle".to_string());
-            timer
-                .0
-                .set_duration(Duration::from_secs_f32(IDLE_ANIMATION_LEN));
-            timer.0.reset();
             velocity.linvel = input_vector;
         }
     }
@@ -202,65 +187,48 @@ pub(crate) fn movement(
 
 pub(crate) fn attack(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(
-        &mut AnimationTree,
-        &InputVector,
-        &mut Velocity,
-        &mut AnimationTimer,
-        &mut Player,
-    )>,
+    mut query: Query<(&mut AnimationTree, &InputVector, &mut Velocity, &mut Player)>,
 ) {
-    let (mut animation, input_vector, mut velocity, mut timer, mut player) = query.single_mut();
+    let (mut animation, input_vector, mut velocity, mut player) = query.single_mut();
 
     if player.state == PlayerState::MOVE && keyboard_input.just_pressed(KeyCode::J) {
         velocity.linvel = Vec2::ZERO;
 
         animation.travel(input_vector.0, "attack".to_string());
-
-        timer
-            .0
-            .set_duration(Duration::from_secs_f32(ATTACK_ANIMATION_LEN));
-        timer.0.reset();
         player.state = PlayerState::ATTACK;
     }
 }
 
 pub(crate) fn roll(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(
-        &mut AnimationTree,
-        &InputVector,
-        &mut Velocity,
-        &mut AnimationTimer,
-        &mut Player,
-    )>,
+    mut query: Query<(&mut AnimationTree, &InputVector, &mut Velocity, &mut Player)>,
 ) {
-    let (mut animation, input_vector, mut velocity, mut timer, mut player) = query.single_mut();
+    let (mut animation, input_vector, mut velocity, mut player) = query.single_mut();
 
     if player.state == PlayerState::MOVE && keyboard_input.just_pressed(KeyCode::K) {
         velocity.linvel = input_vector.0 * 120.;
 
         animation.travel(input_vector.0, "roll".to_string());
-
-        timer
-            .0
-            .set_duration(Duration::from_secs_f32(ROLL_ANIMATION_LEN));
-        timer.0.reset();
         player.state = PlayerState::ROLL;
     }
 }
 
 pub(crate) fn state(
-    time: Res<Time>,
-    mut query: Query<(&mut Velocity, &mut AnimationTimer, &mut Player)>,
+    removed: RemovedComponents<Play>,
+    mut query: Query<(&mut Velocity, &AnimationTree, &mut Player)>,
 ) {
-    for (mut velocity, mut timer, mut player) in query.iter_mut() {
-        timer.0.tick(time.delta());
-        if timer.0.just_finished() && player.state != PlayerState::MOVE {
-            if player.state == PlayerState::ROLL {
-                velocity.linvel = Vec2::ZERO;
+    for entity in removed.iter() {
+        for (mut velocity, animation_tree, mut player) in query.get_mut(entity) {
+            match animation_tree.finished.as_str() {
+                "attack" => {
+                    player.state = PlayerState::MOVE;
+                }
+                "roll" => {
+                    velocity.linvel = Vec2::ZERO;
+                    player.state = PlayerState::MOVE;
+                }
+                _ => {}
             }
-            player.state = PlayerState::MOVE;
         }
     }
 }

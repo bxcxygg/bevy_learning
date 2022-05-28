@@ -61,6 +61,7 @@ impl AnimationNodeMachine {
 pub struct AnimationTree {
     current: String,
     next: String,
+    pub finished: String,
     point: Vec2,
     pub nodes: HashMap<String, AnimationNodeMachine>,
 }
@@ -70,6 +71,7 @@ impl Default for AnimationTree {
         AnimationTree {
             current: "".to_string(),
             next: "".to_string(),
+            finished: "".to_string(),
             point: Vec2::ZERO,
             nodes: HashMap::new(),
         }
@@ -81,6 +83,7 @@ impl AnimationTree {
         AnimationTree {
             current: default,
             next: "".to_string(),
+            finished: "".to_string(),
             point: Vec2::ZERO,
             nodes,
         }
@@ -144,6 +147,7 @@ pub(crate) fn animation_tree(
 ) {
     for entity in removed.iter() {
         if let Ok((mut animation, mut animation_tree)) = query.get_mut(entity) {
+            animation_tree.finished = animation_tree.current.clone();
             let next_node = animation_tree.nodes.get(&animation_tree.next);
             match next_node {
                 Some(next_node) => {

@@ -10,7 +10,7 @@ pub struct AnimationTreePlugin;
 impl Plugin for AnimationTreePlugin {
     fn build(&self, app: &mut App) {
         app.add_system_to_stage(CoreStage::PreUpdate, create_animation)
-            .add_system_to_stage(CoreStage::PreUpdate, next_animation)
+            .add_system_to_stage(CoreStage::PostUpdate, next_animation)
             .add_system_to_stage(CoreStage::PostUpdate, animation_tree);
     }
 
