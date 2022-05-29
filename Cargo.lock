@@ -224,7 +224,6 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fce306d40a111309ee61d4626efbafccdd46bb80657122c38061fa7264c08e4"
 dependencies = [
- "bevy_dylib",
  "bevy_internal",
 ]
 
@@ -427,15 +426,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_dylib"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bf02ce7a578743cd94cb38dc7a9b405d6058a2317011744371eaa56b4d6e786"
-dependencies = [
- "bevy_internal",
-]
-
-[[package]]
 name = "bevy_ecs"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -597,7 +587,6 @@ dependencies = [
  "bevy-inspector-egui-rapier",
  "bevy-parallax",
  "bevy_input_actionmap",
- "bevy_prototype_debug_lines",
  "bevy_rapier2d",
  "rand",
 ]
@@ -657,15 +646,6 @@ dependencies = [
  "bevy_window",
  "bitflags",
  "bytemuck",
-]
-
-[[package]]
-name = "bevy_prototype_debug_lines"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a459a20dac7595bc3122693bc850236d1cfba7dafc56ad168b689bd13e912604"
-dependencies = [
- "bevy",
 ]
 
 [[package]]

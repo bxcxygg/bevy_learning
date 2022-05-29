@@ -3,6 +3,7 @@ use crate::components::InputVector;
 use benimator::{Play, SpriteSheetAnimation};
 use bevy::prelude::*;
 use bevy::utils::HashMap;
+use bevy_input_actionmap::InputMap;
 use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 use std::time::Duration;
@@ -13,6 +14,16 @@ enum PlayerState {
     MOVE,
     ATTACK,
     ROLL,
+}
+
+#[derive(Hash, PartialEq, Eq, Clone, Debug)]
+pub enum Action {
+    Up,
+    Down,
+    Left,
+    Right,
+    Attack,
+    Roll,
 }
 
 #[derive(Component, Default, Inspectable)]
@@ -104,6 +115,20 @@ pub(crate) fn create_animate(mut assets: ResMut<Assets<SpriteSheetAnimation>>) -
     AnimationTree::from(nodes, "idle".to_string())
 }
 
+pub(crate) fn setup(mut input: ResMut<InputMap<Action>>) {
+    input
+        .bind(Action::Up, KeyCode::Up)
+        .bind(Action::Up, KeyCode::W)
+        .bind(Action::Left, KeyCode::Left)
+        .bind(Action::Left, KeyCode::A)
+        .bind(Action::Down, KeyCode::Down)
+        .bind(Action::Down, KeyCode::S)
+        .bind(Action::Right, KeyCode::Left)
+        .bind(Action::Right, KeyCode::D)
+        .bind(Action::Attack, KeyCode::J)
+        .bind(Action::Roll, KeyCode::K);
+}
+
 pub(crate) fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -149,7 +174,7 @@ pub(crate) fn spawn_player(
 }
 
 pub(crate) fn movement(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<InputMap<Action>>,
     mut query: Query<(
         &mut AnimationTree,
         &mut InputVector,
@@ -160,19 +185,10 @@ pub(crate) fn movement(
     let (mut animation, mut vector, mut velocity, player) = query.single_mut();
 
     if player.state == PlayerState::MOVE {
-        let mut input_vector = Vec2::ZERO;
-        if keyboard_input.pressed(KeyCode::Right) || keyboard_input.pressed(KeyCode::D) {
-            input_vector.x += 1.;
-        }
-        if keyboard_input.pressed(KeyCode::Left) || keyboard_input.pressed(KeyCode::A) {
-            input_vector.x -= 1.;
-        }
-        if keyboard_input.pressed(KeyCode::Up) || keyboard_input.pressed(KeyCode::W) {
-            input_vector.y += 1.;
-        }
-        if keyboard_input.pressed(KeyCode::Down) || keyboard_input.pressed(KeyCode::S) {
-            input_vector.y -= 1.;
-        }
+        let input_vector = Vec2::new(
+            keyboard_input.strength(Action::Right) - keyboard_input.strength(Action::Left),
+            keyboard_input.strength(Action::Up) - keyboard_input.strength(Action::Down),
+        );
 
         if input_vector != Vec2::ZERO {
             vector.0 = input_vector.normalize();
@@ -187,12 +203,12 @@ pub(crate) fn movement(
 }
 
 pub(crate) fn attack(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<InputMap<Action>>,
     mut query: Query<(&mut AnimationTree, &InputVector, &mut Velocity, &mut Player)>,
 ) {
     let (mut animation, input_vector, mut velocity, mut player) = query.single_mut();
 
-    if player.state == PlayerState::MOVE && keyboard_input.just_pressed(KeyCode::J) {
+    if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::Attack) {
         velocity.linvel = Vec2::ZERO;
 
         animation.travel(input_vector.0, "attack".to_string());
@@ -201,12 +217,12 @@ pub(crate) fn attack(
 }
 
 pub(crate) fn roll(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<InputMap<Action>>,
     mut query: Query<(&mut AnimationTree, &InputVector, &mut Velocity, &mut Player)>,
 ) {
     let (mut animation, input_vector, mut velocity, mut player) = query.single_mut();
 
-    if player.state == PlayerState::MOVE && keyboard_input.just_pressed(KeyCode::K) {
+    if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::Roll) {
         velocity.linvel = input_vector.0 * 120.;
 
         animation.travel(input_vector.0, "roll".to_string());

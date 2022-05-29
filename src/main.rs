@@ -13,7 +13,6 @@ use bevy::winit::WinitSettings;
 use bevy_inspector_egui::{InspectableRegistry, WorldInspectorPlugin};
 use bevy_inspector_egui_rapier::InspectableRapierPlugin;
 use bevy_parallax::{LayerData, ParallaxCameraComponent, ParallaxPlugin, ParallaxResource};
-use bevy_prototype_debug_lines::DebugLinesPlugin;
 use bevy_rapier2d::prelude::*;
 
 fn main() {
@@ -65,7 +64,6 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
-        .add_plugin(DebugLinesPlugin::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(InspectableRapierPlugin)
