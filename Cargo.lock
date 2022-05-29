@@ -277,6 +277,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy-parallax"
+version = "0.1.2"
+source = "git+https://github.com/Corrosive-Games/bevy-parallax#a67ea58629751c7d8cb03166d40708e92d6f53ba"
+dependencies = [
+ "bevy",
+ "serde",
+]
+
+[[package]]
 name = "bevy_animation"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -535,6 +544,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_input_actionmap"
+version = "0.1.0"
+source = "git+https://github.com/lightsoutgames/bevy_input_actionmap#84c19d027bda2ec38a1f47591a8513af763bb572"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "bevy_internal"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -578,6 +595,9 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy-inspector-egui-rapier",
+ "bevy-parallax",
+ "bevy_input_actionmap",
+ "bevy_prototype_debug_lines",
  "bevy_rapier2d",
  "rand",
 ]
@@ -637,6 +657,15 @@ dependencies = [
  "bevy_window",
  "bitflags",
  "bytemuck",
+]
+
+[[package]]
+name = "bevy_prototype_debug_lines"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a459a20dac7595bc3122693bc850236d1cfba7dafc56ad168b689bd13e912604"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]

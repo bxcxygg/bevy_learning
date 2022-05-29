@@ -11,6 +11,9 @@ bevy-inspector-egui = "0.11"
 bevy-inspector-egui-rapier = { version = "0.3", features = ["rapier2d"] }
 benimator = "3.0.0"
 bevy_rapier2d = { version = "0.13", features = ["debug-render", "parallel"] }
+bevy_prototype_debug_lines = { version = "0.7" }
+bevy_input_actionmap = { git = "https://github.com/lightsoutgames/bevy_input_actionmap" }
+bevy-parallax = { git = "https://github.com/Corrosive-Games/bevy-parallax" }
 
 [dependencies.bevy]
 version = "0.7"

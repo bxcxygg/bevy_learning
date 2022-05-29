@@ -120,6 +120,7 @@ pub(crate) fn spawn_player(
                 60,
                 1,
             )),
+            transform: Transform::from_xyz(0., 0., 1.),
             visibility: Visibility { is_visible: true },
             ..default()
         })
@@ -142,7 +143,7 @@ pub(crate) fn spawn_player(
             children.spawn_bundle((
                 Name::from("PlayerCollider"),
                 Collider::capsule_x(4., 4.),
-                Transform::from_xyz(0., -8., 0.),
+                Transform::from_xyz(0., -8., 1.),
             ));
         });
 }
