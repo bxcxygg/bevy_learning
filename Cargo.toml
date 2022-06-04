@@ -5,16 +5,21 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+editor_window = []
+debug = ["bevy_rapier2d/debug-render", "bevy/dynamic", "editor_window"]
+
 [dependencies]
 rand = "0.8"
-bevy-inspector-egui = "0.11"
-bevy-inspector-egui-rapier = { version = "0.3", features = ["rapier2d"] }
 benimator = "3.0.0"
-bevy_rapier2d = { version = "0.13", features = ["debug-render", "parallel"] }
+bevy_rapier2d = { version = "0.13", features = ["parallel"] }
 bevy_input_actionmap = { git = "https://github.com/lightsoutgames/bevy_input_actionmap" }
 bevy-parallax = { git = "https://github.com/Corrosive-Games/bevy-parallax" }
+bevy-inspector-egui = "0.10"
+bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls", features = [] }
 
 [dependencies.bevy]
 version = "0.7"
 default-features = true
-#features = ["dynamic"]
+
+[dev-dependencies]

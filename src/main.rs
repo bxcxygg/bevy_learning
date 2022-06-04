@@ -10,14 +10,12 @@ use crate::components::InputVector;
 use benimator::AnimationPlugin;
 use bevy::prelude::*;
 use bevy::winit::WinitSettings;
-use bevy_inspector_egui::{InspectableRegistry, WorldInspectorPlugin};
-use bevy_inspector_egui_rapier::InspectableRapierPlugin;
 use bevy_parallax::{LayerData, ParallaxCameraComponent, ParallaxPlugin, ParallaxResource};
 use bevy_rapier2d::prelude::*;
 
 fn main() {
-    App::new()
-        .insert_resource(WinitSettings::game())
+    let mut app = App::new();
+    app.insert_resource(WinitSettings::game())
         .insert_resource(WindowDescriptor {
             title: "RPG".to_string(),
             width: 320. * common::SCALE,
@@ -63,11 +61,19 @@ fn main() {
             ],
             ..Default::default()
         })
-        .add_plugins(DefaultPlugins)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+        .add_plugins(DefaultPlugins);
+
+    #[cfg(feature = "editor_window")]
+    {
+        use bevy_editor_pls::EditorPlugin;
+        use bevy_inspector_egui::RegisterInspectable;
+
+        app.add_plugin(EditorPlugin)
+            .register_inspectable::<InputVector>();
+    }
+
+    app.add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_plugin(RapierDebugRenderPlugin::default())
-        .add_plugin(InspectableRapierPlugin)
-        .add_plugin(WorldInspectorPlugin::default())
         .add_plugin(ParallaxPlugin)
         .add_plugin(AnimationPlugin::default())
         .add_plugin(AnimationTreePlugin)
@@ -80,10 +86,6 @@ struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        let mut registry = app.world.get_resource_mut::<InspectableRegistry>().unwrap();
-
-        registry.register::<InputVector>();
-
         app.add_startup_system(spawn_camera)
             .add_startup_system(set_gravity);
     }

@@ -8,8 +8,8 @@ use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 use std::time::Duration;
 
-#[derive(Default, Eq, PartialEq, Clone, Inspectable)]
-enum PlayerState {
+#[derive(Default, Eq, PartialEq, Clone, Reflect, Inspectable)]
+pub(crate) enum PlayerState {
     #[default]
     MOVE,
     ATTACK,
@@ -26,7 +26,7 @@ pub enum Action {
     Roll,
 }
 
-#[derive(Component, Default, Inspectable)]
+#[derive(Component, Default, Reflect, Inspectable)]
 pub(crate) struct Player {
     state: PlayerState,
 }
@@ -123,7 +123,7 @@ pub(crate) fn setup(mut input: ResMut<InputMap<Action>>) {
         .bind(Action::Left, KeyCode::A)
         .bind(Action::Down, KeyCode::Down)
         .bind(Action::Down, KeyCode::S)
-        .bind(Action::Right, KeyCode::Left)
+        .bind(Action::Right, KeyCode::Right)
         .bind(Action::Right, KeyCode::D)
         .bind(Action::Attack, KeyCode::J)
         .bind(Action::Roll, KeyCode::K);
