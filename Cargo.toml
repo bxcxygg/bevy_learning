@@ -14,9 +14,9 @@ rand = "0.8"
 benimator = "3.0.0"
 bevy_rapier2d = { version = "0.13", features = ["parallel"] }
 bevy_input_actionmap = { git = "https://github.com/lightsoutgames/bevy_input_actionmap" }
-bevy-parallax = { git = "https://github.com/Corrosive-Games/bevy-parallax" }
 bevy-inspector-egui = "0.10"
 bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls", features = [] }
+bevy_ecs_ldtk = "0.3"
 
 [dependencies.bevy]
 version = "0.7"
