@@ -146,6 +146,7 @@ pub(crate) fn animation_tree(
     mut query: Query<(&mut Handle<SpriteSheetAnimation>, &mut AnimationTree)>,
 ) {
     for entity in removed.iter() {
+        commands.entity(entity).insert(Play);
         if let Ok((mut animation, mut animation_tree)) = query.get_mut(entity) {
             animation_tree.finished = animation_tree.current.clone();
             let next_node = animation_tree.nodes.get(&animation_tree.next);
@@ -157,7 +158,6 @@ pub(crate) fn animation_tree(
                     }
                     animation_tree.current = animation_tree.next.clone();
                     animation_tree.next = "".to_string();
-                    commands.entity(entity).insert(Play);
                 }
                 None => {
                     if let Some(current_node) = animation_tree.nodes.get(&animation_tree.current) {
@@ -175,7 +175,6 @@ pub(crate) fn animation_tree(
                             }
                             None => {}
                         }
-                        commands.entity(entity).insert(Play);
                     }
                 }
             }
