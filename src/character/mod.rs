@@ -1,6 +1,5 @@
-mod player;
+pub(crate) mod player;
 
-use crate::character::player::Player;
 use bevy::prelude::*;
 use bevy_input_actionmap::ActionPlugin;
 
@@ -12,7 +11,7 @@ impl Plugin for CharacterPlugin {
         {
             use bevy_inspector_egui::RegisterInspectable;
 
-            app.register_inspectable::<Player>();
+            app.register_inspectable::<player::Player>();
         }
         app.add_plugin(ActionPlugin::<player::Action>::default())
             .add_startup_system(player::setup)

@@ -11,7 +11,6 @@ use crate::components::InputVector;
 use crate::world::WorldPlugin;
 use benimator::AnimationPlugin;
 use bevy::prelude::*;
-use bevy::render::camera::ScalingMode;
 use bevy::winit::WinitSettings;
 use bevy_rapier2d::prelude::*;
 
@@ -57,10 +56,10 @@ impl Plugin for GamePlugin {
 
 fn spawn_camera(mut commands: Commands) {
     // Camera
-    let mut orthographic_camera = OrthographicCameraBundle::new_2d();
-    orthographic_camera.orthographic_projection.scale = common::SCALE * 0.1;
-
-    commands.spawn_bundle(orthographic_camera);
+    commands
+        .spawn_bundle(OrthographicCameraBundle::new_2d())
+        .insert(Name::new("Level Camera"))
+        .insert(components::LevelCamera);
 }
 
 fn set_gravity(mut rapier_config: ResMut<RapierConfiguration>) {
