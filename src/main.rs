@@ -7,12 +7,12 @@ mod world;
 
 use crate::animation_tree::AnimationTreePlugin;
 use crate::character::CharacterPlugin;
-use crate::components::InputVector;
 use crate::world::WorldPlugin;
 use benimator::AnimationPlugin;
 use bevy::prelude::*;
 use bevy::winit::WinitSettings;
 use bevy_rapier2d::prelude::*;
+use bevy_rapier2d::rapier::prelude::DebugRenderPipeline;
 
 fn main() {
     let mut app = App::new();
@@ -28,15 +28,16 @@ fn main() {
 
     #[cfg(feature = "editor_window")]
     {
+        use crate::components::InputVector;
         use bevy_editor_pls::EditorPlugin;
         use bevy_inspector_egui::RegisterInspectable;
 
         app.add_plugin(EditorPlugin)
-            .register_inspectable::<InputVector>();
+            .register_inspectable::<InputVector>()
+            .add_plugin(RapierDebugRenderPlugin::default());
     }
 
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(AnimationPlugin::default())
         .add_plugin(AnimationTreePlugin)
         .add_plugin(GamePlugin)

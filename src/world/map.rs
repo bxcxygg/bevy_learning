@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::{
     GridCoords, LayerInstance, LdtkIntCell, LdtkLevel, LdtkWorldBundle, LevelSelection,
 };
+use bevy_rapier2d::na::SimdPartialOrd;
 use bevy_rapier2d::prelude::{Collider, Friction, RigidBody};
 use std::collections::{HashMap, HashSet};
 
@@ -70,7 +71,7 @@ pub fn spawn_wall_collision(
                     .level
                     .layer_instances
                     .clone()
-                    .expect("Level asset should have layers")[0];
+                    .expect("Level asset should have layers")[2];
 
                 // combine wall tiles into flat "plates" in each individual row
                 let mut plate_stack: Vec<Vec<Plate>> = Vec::new();
@@ -147,7 +148,7 @@ pub fn spawn_wall_collision(
                                 * grid_size as f32
                                 / 2.,
                         ))
-                        .insert(RigidBody::KinematicPositionBased)
+                        .insert(RigidBody::Fixed)
                         .insert(Friction::coefficient(1.))
                         .insert(Transform::from_xyz(
                             (wall_rect.left + wall_rect.right + 1) as f32 * grid_size as f32 / 2.,
