@@ -12,7 +12,6 @@ use benimator::AnimationPlugin;
 use bevy::prelude::*;
 use bevy::winit::WinitSettings;
 use bevy_rapier2d::prelude::*;
-use bevy_rapier2d::rapier::prelude::DebugRenderPipeline;
 
 fn main() {
     let mut app = App::new();

@@ -165,11 +165,9 @@ pub(crate) fn spawn_player(
         ))
         // spawn player collision bundle as children entity.
         .with_children(|children| {
-            children.spawn_bundle((
-                Name::from("PlayerCollider"),
-                Collider::capsule_x(4., 4.),
-                Transform::from_xyz(0., -8., 10.),
-            ));
+            children
+                .spawn_bundle((Name::from("PlayerCollider"), Collider::capsule_x(4., 4.)))
+                .insert_bundle(TransformBundle::from(Transform::from_xyz(0., -8., 10.)));
         });
 }
 

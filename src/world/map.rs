@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::{
     GridCoords, LayerInstance, LdtkIntCell, LdtkLevel, LdtkWorldBundle, LevelSelection,
 };
-use bevy_rapier2d::na::SimdPartialOrd;
 use bevy_rapier2d::prelude::{Collider, Friction, RigidBody};
 use std::collections::{HashMap, HashSet};
 
@@ -148,14 +147,12 @@ pub fn spawn_wall_collision(
                                 * grid_size as f32
                                 / 2.,
                         ))
-                        .insert(RigidBody::Fixed)
                         .insert(Friction::coefficient(1.))
-                        .insert(Transform::from_xyz(
+                        .insert_bundle(TransformBundle::from(Transform::from_xyz(
                             (wall_rect.left + wall_rect.right + 1) as f32 * grid_size as f32 / 2.,
                             (wall_rect.bottom + wall_rect.top + 1) as f32 * grid_size as f32 / 2.,
                             0.,
-                        ))
-                        .insert(GlobalTransform::default())
+                        )))
                         // Making the collider a child of the level serves two purposes:
                         // 1. Adjusts the transforms to be relative to the level for free
                         // 2. the colliders will be despawned automatically when levels unload
