@@ -7,13 +7,12 @@ mod world;
 
 use crate::animation_tree::AnimationTreePlugin;
 use crate::character::CharacterPlugin;
-use crate::components::InputVector;
 use crate::world::WorldPlugin;
 use benimator::AnimationPlugin;
 use bevy::prelude::*;
-use bevy::render::camera::ScalingMode;
 use bevy::winit::WinitSettings;
 use bevy_rapier2d::prelude::*;
+use bevy_rapier2d::rapier::prelude::DebugRenderPipeline;
 
 fn main() {
     let mut app = App::new();
@@ -29,15 +28,16 @@ fn main() {
 
     #[cfg(feature = "editor_window")]
     {
+        use crate::components::InputVector;
         use bevy_editor_pls::EditorPlugin;
         use bevy_inspector_egui::RegisterInspectable;
 
         app.add_plugin(EditorPlugin)
-            .register_inspectable::<InputVector>();
+            .register_inspectable::<InputVector>()
+            .add_plugin(RapierDebugRenderPlugin::default());
     }
 
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(AnimationPlugin::default())
         .add_plugin(AnimationTreePlugin)
         .add_plugin(GamePlugin)
@@ -57,10 +57,10 @@ impl Plugin for GamePlugin {
 
 fn spawn_camera(mut commands: Commands) {
     // Camera
-    let mut orthographic_camera = OrthographicCameraBundle::new_2d();
-    orthographic_camera.orthographic_projection.scale = common::SCALE * 0.1;
-
-    commands.spawn_bundle(orthographic_camera);
+    commands
+        .spawn_bundle(OrthographicCameraBundle::new_2d())
+        .insert(Name::new("Level Camera"))
+        .insert(components::LevelCamera);
 }
 
 fn set_gravity(mut rapier_config: ResMut<RapierConfiguration>) {
