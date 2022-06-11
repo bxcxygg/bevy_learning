@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::{
     GridCoords, LayerInstance, LdtkIntCell, LdtkLevel, LdtkWorldBundle, LevelSelection,
 };
-use bevy_rapier2d::prelude::{Collider, Friction, RigidBody};
+use bevy_rapier2d::prelude::{Collider, Friction};
 use std::collections::{HashMap, HashSet};
 
 pub(crate) fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {

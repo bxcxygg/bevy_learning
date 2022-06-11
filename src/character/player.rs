@@ -3,6 +3,9 @@ use crate::components::InputVector;
 use benimator::{Play, SpriteSheetAnimation};
 use bevy::prelude::*;
 use bevy::utils::HashMap;
+use bevy_ecs_ldtk::ldtk::TilesetDefinition;
+use bevy_ecs_ldtk::prelude::LdtkEntity;
+use bevy_ecs_ldtk::{EntityInstance, LayerInstance};
 use bevy_input_actionmap::InputMap;
 use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
@@ -31,7 +34,46 @@ pub(crate) struct Player {
     state: PlayerState,
 }
 
-pub(crate) fn create_animate(mut assets: ResMut<Assets<SpriteSheetAnimation>>) -> AnimationTree {
+#[derive(Bundle)]
+pub struct PlayerBundle {
+    name: Name,
+    player: Player,
+    #[bundle]
+    sprite_sheet: SpriteSheetBundle,
+}
+
+impl LdtkEntity for PlayerBundle {
+    fn bundle_entity(
+        entity_instance: &EntityInstance,
+        layer_instance: &LayerInstance,
+        _tileset: Option<&Handle<Image>>,
+        _tileset_definition: Option<&TilesetDefinition>,
+        asset_server: &AssetServer,
+        texture_atlases: &mut Assets<TextureAtlas>,
+    ) -> Self {
+        PlayerBundle {
+            sprite_sheet: SpriteSheetBundle {
+                texture_atlas: texture_atlases.add(TextureAtlas::from_grid(
+                    asset_server.load("Player/Player.png"),
+                    Vec2::new(64.0, 64.0),
+                    60,
+                    1,
+                )),
+                transform: Transform::from_xyz(
+                    entity_instance.px.x as f32,
+                    entity_instance.px.y as f32,
+                    layer_instance.seed as f32,
+                ),
+                visibility: Visibility { is_visible: true },
+                ..default()
+            },
+            name: Name::from("Player"),
+            player: Player::default(),
+        }
+    }
+}
+
+pub(crate) fn create_animate(assets: &mut ResMut<Assets<SpriteSheetAnimation>>) -> AnimationTree {
     let run_right = Animation::from(
         assets.add(SpriteSheetAnimation::from_range(0..=5, Duration::from_secs_f32(0.1)).once()),
     );
@@ -132,43 +174,32 @@ pub(crate) fn setup(mut input: ResMut<InputMap<Action>>) {
 pub(crate) fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    assets: ResMut<Assets<SpriteSheetAnimation>>,
+    mut assets: ResMut<Assets<SpriteSheetAnimation>>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    query: Query<(Entity, &Transform), Added<Player>>,
 ) {
-    // Spawn the player.
-    commands
-        // spawn player sprite bundle.
-        .spawn_bundle(SpriteSheetBundle {
-            texture_atlas: texture_atlases.add(TextureAtlas::from_grid(
-                asset_server.load("Player/Player.png"),
-                Vec2::new(64.0, 64.0),
-                60,
-                1,
-            )),
-            transform: Transform::from_xyz(0., 0., 10.),
-            visibility: Visibility { is_visible: true },
-            ..default()
-        })
-        .insert_bundle((
-            Name::from("Player"),
-            Player::default(),
-            InputVector::default(),
-            // player animation.
-            create_animate(assets),
-        ))
-        // spawn player rigid body bundle.
-        .insert_bundle((
-            RigidBody::Dynamic,
-            // lock the player body rotation.
-            LockedAxes::ROTATION_LOCKED,
-            Velocity::default(),
-        ))
-        // spawn player collision bundle as children entity.
-        .with_children(|children| {
-            children
-                .spawn_bundle((Name::from("PlayerCollider"), Collider::capsule_x(4., 4.)))
-                .insert_bundle(TransformBundle::from(Transform::from_xyz(0., -8., 10.)));
-        });
+    query.for_each(|(entity, transform)| {
+        // Spawn the player.
+        commands
+            .entity(entity)
+            .insert_bundle((
+                InputVector::default(),
+                // player animation.
+                create_animate(&mut assets),
+            ))
+            // spawn player rigid body bundle.
+            .insert_bundle((
+                RigidBody::Dynamic,
+                LockedAxes::ROTATION_LOCKED,
+                Velocity::default(),
+            ))
+            // spawn player collision bundle as children entity.
+            .with_children(|children| {
+                children
+                    .spawn_bundle((Name::from("PlayerCollider"), Collider::capsule_x(4., 4.)))
+                    .insert_bundle(TransformBundle::from(Transform::from_xyz(0., 0., 0.)));
+            });
+    });
 }
 
 pub(crate) fn movement(
@@ -180,22 +211,22 @@ pub(crate) fn movement(
         &mut Player,
     )>,
 ) {
-    let (mut animation, mut vector, mut velocity, player) = query.single_mut();
+    for (mut animation, mut vector, mut velocity, player) in query.iter_mut() {
+        if player.state == PlayerState::MOVE {
+            let input_vector = Vec2::new(
+                keyboard_input.strength(Action::Right) - keyboard_input.strength(Action::Left),
+                keyboard_input.strength(Action::Up) - keyboard_input.strength(Action::Down),
+            );
 
-    if player.state == PlayerState::MOVE {
-        let input_vector = Vec2::new(
-            keyboard_input.strength(Action::Right) - keyboard_input.strength(Action::Left),
-            keyboard_input.strength(Action::Up) - keyboard_input.strength(Action::Down),
-        );
+            if input_vector != Vec2::ZERO {
+                vector.0 = input_vector.normalize();
 
-        if input_vector != Vec2::ZERO {
-            vector.0 = input_vector.normalize();
-
-            animation.travel(vector.0, "run".to_string());
-            velocity.linvel = vector.0 * 80.;
-        } else {
-            animation.travel(vector.0, "idle".to_string());
-            velocity.linvel = input_vector;
+                animation.travel(vector.0, "run".to_string());
+                velocity.linvel = vector.0 * 80.;
+            } else {
+                animation.travel(vector.0, "idle".to_string());
+                velocity.linvel = input_vector;
+            }
         }
     }
 }
@@ -204,13 +235,13 @@ pub(crate) fn attack(
     keyboard_input: Res<InputMap<Action>>,
     mut query: Query<(&mut AnimationTree, &InputVector, &mut Velocity, &mut Player)>,
 ) {
-    let (mut animation, input_vector, mut velocity, mut player) = query.single_mut();
+    for (mut animation, input_vector, mut velocity, mut player) in query.iter_mut() {
+        if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::Attack) {
+            velocity.linvel = Vec2::ZERO;
 
-    if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::Attack) {
-        velocity.linvel = Vec2::ZERO;
-
-        animation.travel(input_vector.0, "attack".to_string());
-        player.state = PlayerState::ATTACK;
+            animation.travel(input_vector.0, "attack".to_string());
+            player.state = PlayerState::ATTACK;
+        }
     }
 }
 
@@ -218,13 +249,13 @@ pub(crate) fn roll(
     keyboard_input: Res<InputMap<Action>>,
     mut query: Query<(&mut AnimationTree, &InputVector, &mut Velocity, &mut Player)>,
 ) {
-    let (mut animation, input_vector, mut velocity, mut player) = query.single_mut();
+    for (mut animation, input_vector, mut velocity, mut player) in query.iter_mut() {
+        if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::Roll) {
+            velocity.linvel = input_vector.0 * 120.;
 
-    if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::Roll) {
-        velocity.linvel = input_vector.0 * 120.;
-
-        animation.travel(input_vector.0, "roll".to_string());
-        player.state = PlayerState::ROLL;
+            animation.travel(input_vector.0, "roll".to_string());
+            player.state = PlayerState::ROLL;
+        }
     }
 }
 
