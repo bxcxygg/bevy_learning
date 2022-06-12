@@ -20,7 +20,7 @@ impl Plugin for CharacterPlugin {
             .add_system_to_stage(CoreStage::Update, player::movement)
             .add_system_to_stage(CoreStage::Update, player::attack)
             .add_system_to_stage(CoreStage::Update, player::roll)
-            .add_system_to_stage(CoreStage::PostUpdate, player::state)
+            .add_system_to_stage(CoreStage::PostUpdate, player::state.after("animation_tree"))
             .register_ldtk_entity::<player::PlayerBundle>("Player");
     }
 }
