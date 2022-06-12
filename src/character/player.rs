@@ -110,18 +110,22 @@ pub(crate) fn create_animate(assets: &mut ResMut<Assets<SpriteSheetAnimation>>) 
     let roll_down = Animation::from(
         assets.add(SpriteSheetAnimation::from_range(55..=59, Duration::from_secs_f32(0.1)).once()),
     );
-    let idle_right = Animation::from(
-        assets.add(SpriteSheetAnimation::from_range(0..=0, Duration::from_secs_f32(0.1)).once()),
-    );
-    let idle_up = Animation::from(
-        assets.add(SpriteSheetAnimation::from_range(6..=6, Duration::from_secs_f32(0.1)).once()),
-    );
-    let idle_left = Animation::from(
-        assets.add(SpriteSheetAnimation::from_range(12..=12, Duration::from_secs_f32(0.1)).once()),
-    );
-    let idle_down = Animation::from(
-        assets.add(SpriteSheetAnimation::from_range(18..=18, Duration::from_secs_f32(0.1)).once()),
-    );
+    let idle_right = Animation::from(assets.add(SpriteSheetAnimation::from_range(
+        0..=0,
+        Duration::from_secs_f32(0.1),
+    )));
+    let idle_up = Animation::from(assets.add(SpriteSheetAnimation::from_range(
+        6..=6,
+        Duration::from_secs_f32(0.1),
+    )));
+    let idle_left = Animation::from(assets.add(SpriteSheetAnimation::from_range(
+        12..=12,
+        Duration::from_secs_f32(0.1),
+    )));
+    let idle_down = Animation::from(assets.add(SpriteSheetAnimation::from_range(
+        18..=18,
+        Duration::from_secs_f32(0.1),
+    )));
 
     let run = AnimationNodeMachine::from(vec![
         AnimationNode::from(run_down, Vec2::new(0., -1.)),
@@ -173,9 +177,7 @@ pub(crate) fn setup(mut input: ResMut<InputMap<Action>>) {
 
 pub(crate) fn spawn_player(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut assets: ResMut<Assets<SpriteSheetAnimation>>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     query: Query<(Entity, &Transform), Added<Player>>,
 ) {
     query.for_each(|(entity, transform)| {

@@ -1,4 +1,3 @@
-#![feature(derive_default_enum)]
 mod animation_tree;
 mod character;
 mod common;
