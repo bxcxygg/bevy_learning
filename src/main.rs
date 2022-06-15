@@ -3,6 +3,7 @@ mod character;
 mod common;
 mod components;
 mod world;
+mod ysort;
 
 use crate::animation_tree::AnimationTreePlugin;
 use crate::character::CharacterPlugin;
