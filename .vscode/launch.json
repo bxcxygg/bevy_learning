@@ -12,7 +12,9 @@
                 "args": [
                     "build",
                     "--bin=bevy_learning",
-                    "--package=bevy_learning"
+                    "--package=bevy_learning",
+                    "--features",
+                    "debug"
                 ],
                 "filter": {
                     "name": "bevy_learning",
@@ -20,25 +22,9 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'bevy_learning'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=bevy_learning",
-                    "--package=bevy_learning"
-                ],
-                "filter": {
-                    "name": "bevy_learning",
-                    "kind": "bin"
-                }
+            "env": {
+                "CARGO_MANIFEST_DIR": "${workspaceFolder}"
             },
-            "args": [],
             "cwd": "${workspaceFolder}"
         }
     ]

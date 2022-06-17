@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::Inspectable;
 
-#[derive(Component, Default, Deref, DerefMut, Debug, Reflect, Inspectable)]
+#[derive(Component, Default, Deref, DerefMut, Debug, Reflect)]
+#[reflect(Component)]
 pub struct InputVector(pub Vec2);
 
 #[derive(Component, Debug)]

@@ -2,12 +2,13 @@ use bevy::prelude::*;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
-#[derive(Component, Default)]
-pub struct YSort(pub usize);
+#[derive(Component, Default, Reflect)]
+#[reflect(Component)]
+pub struct YSort(pub i32);
 
 fn sort(mut query: Query<(&mut Transform, &YSort)>) {
-    let mut keys: Vec<usize> = Vec::new();
-    let mut transformers: HashMap<usize, Vec<Mut<Transform>>> = HashMap::new();
+    let mut keys: Vec<i32> = Vec::new();
+    let mut transformers: HashMap<i32, Vec<Mut<Transform>>> = HashMap::new();
     for (transform, ysort) in query.iter_mut() {
         if !transformers.contains_key(&ysort.0) {
             transformers.insert(ysort.0, Vec::new());
@@ -39,7 +40,8 @@ pub struct YSortPlugin;
 
 impl Plugin for YSortPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_to_stage(CoreStage::PostUpdate, sort);
+        app.add_system_to_stage(CoreStage::PostUpdate, sort)
+            .register_type::<YSort>();
     }
 
     fn name(&self) -> &str {

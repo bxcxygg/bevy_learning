@@ -1,5 +1,6 @@
 use crate::animation_tree::*;
 use crate::components::InputVector;
+use crate::ysort::YSort;
 use benimator::{Play, SpriteSheetAnimation};
 use bevy::prelude::*;
 use bevy::utils::HashMap;
@@ -10,6 +11,7 @@ use bevy_rapier2d::prelude::*;
 use std::time::Duration;
 
 #[derive(Default, Eq, PartialEq, Clone, Reflect, Inspectable)]
+#[reflect_value(PartialEq)]
 pub(crate) enum PlayerState {
     #[default]
     MOVE,
@@ -19,15 +21,16 @@ pub(crate) enum PlayerState {
 
 #[derive(Hash, PartialEq, Eq, Clone, Debug)]
 pub enum Action {
-    Up,
-    Down,
-    Left,
-    Right,
-    Attack,
-    Roll,
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    ATTACK,
+    ROLL,
 }
 
-#[derive(Component, Default, Reflect, Inspectable)]
+#[derive(Component, Default, Reflect)]
+#[reflect(Component)]
 pub(crate) struct Player {
     state: PlayerState,
 }
@@ -36,6 +39,7 @@ pub(crate) struct Player {
 pub struct PlayerBundle {
     name: Name,
     player: Player,
+    ysort: YSort,
     #[bundle]
     sprite_sheet: SpriteSheetBundle,
 }
@@ -43,7 +47,7 @@ pub struct PlayerBundle {
 impl LdtkEntity for PlayerBundle {
     fn bundle_entity(
         entity_instance: &EntityInstance,
-        layer_instance: &LayerInstance,
+        _layer_instance: &LayerInstance,
         _tileset: Option<&Handle<Image>>,
         _tileset_definition: Option<&TilesetDefinition>,
         asset_server: &AssetServer,
@@ -60,30 +64,36 @@ impl LdtkEntity for PlayerBundle {
                 transform: Transform::from_xyz(
                     entity_instance.px.x as f32,
                     entity_instance.px.y as f32,
-                    layer_instance.seed as f32,
+                    0.,
                 ),
                 visibility: Visibility { is_visible: true },
                 ..default()
             },
             name: Name::from("Player"),
             player: Player::default(),
+            ysort: YSort(4),
         }
     }
 }
 
+/// Create Player Animation Tree.
 pub(crate) fn create_animate(assets: &mut ResMut<Assets<SpriteSheetAnimation>>) -> AnimationTree {
-    let run_right = Animation::from(
-        assets.add(SpriteSheetAnimation::from_range(0..=5, Duration::from_secs_f32(0.1)).once()),
-    );
-    let run_up = Animation::from(
-        assets.add(SpriteSheetAnimation::from_range(6..=11, Duration::from_secs_f32(0.1)).once()),
-    );
-    let run_left = Animation::from(
-        assets.add(SpriteSheetAnimation::from_range(12..=17, Duration::from_secs_f32(0.1)).once()),
-    );
-    let run_down = Animation::from(
-        assets.add(SpriteSheetAnimation::from_range(18..=23, Duration::from_secs_f32(0.1)).once()),
-    );
+    let run_right = Animation::from(assets.add(SpriteSheetAnimation::from_range(
+        0..=5,
+        Duration::from_secs_f32(0.1),
+    )));
+    let run_up = Animation::from(assets.add(SpriteSheetAnimation::from_range(
+        6..=11,
+        Duration::from_secs_f32(0.1),
+    )));
+    let run_left = Animation::from(assets.add(SpriteSheetAnimation::from_range(
+        12..=17,
+        Duration::from_secs_f32(0.1),
+    )));
+    let run_down = Animation::from(assets.add(SpriteSheetAnimation::from_range(
+        18..=23,
+        Duration::from_secs_f32(0.1),
+    )));
     let attack_right = Animation::from(
         assets.add(SpriteSheetAnimation::from_range(24..=27, Duration::from_secs_f32(0.1)).once()),
     );
@@ -160,17 +170,18 @@ pub(crate) fn create_animate(assets: &mut ResMut<Assets<SpriteSheetAnimation>>) 
 }
 
 pub(crate) fn setup(mut input: ResMut<InputMap<Action>>) {
+    // Binding button.
     input
-        .bind(Action::Up, KeyCode::Up)
-        .bind(Action::Up, KeyCode::W)
-        .bind(Action::Left, KeyCode::Left)
-        .bind(Action::Left, KeyCode::A)
-        .bind(Action::Down, KeyCode::Down)
-        .bind(Action::Down, KeyCode::S)
-        .bind(Action::Right, KeyCode::Right)
-        .bind(Action::Right, KeyCode::D)
-        .bind(Action::Attack, KeyCode::J)
-        .bind(Action::Roll, KeyCode::K);
+        .bind(Action::UP, KeyCode::Up)
+        .bind(Action::UP, KeyCode::W)
+        .bind(Action::LEFT, KeyCode::Left)
+        .bind(Action::LEFT, KeyCode::A)
+        .bind(Action::DOWN, KeyCode::Down)
+        .bind(Action::DOWN, KeyCode::S)
+        .bind(Action::RIGHT, KeyCode::Right)
+        .bind(Action::RIGHT, KeyCode::D)
+        .bind(Action::ATTACK, KeyCode::J)
+        .bind(Action::ROLL, KeyCode::K);
 }
 
 pub(crate) fn spawn_player(
@@ -218,8 +229,8 @@ pub(crate) fn movement(
     for (mut animation, mut vector, mut velocity, player) in query.iter_mut() {
         if player.state == PlayerState::MOVE {
             let input_vector = Vec2::new(
-                keyboard_input.strength(Action::Right) - keyboard_input.strength(Action::Left),
-                keyboard_input.strength(Action::Up) - keyboard_input.strength(Action::Down),
+                keyboard_input.strength(Action::RIGHT) - keyboard_input.strength(Action::LEFT),
+                keyboard_input.strength(Action::UP) - keyboard_input.strength(Action::DOWN),
             );
 
             if input_vector != Vec2::ZERO {
@@ -240,7 +251,7 @@ pub(crate) fn attack(
     mut query: Query<(&mut AnimationTree, &InputVector, &mut Velocity, &mut Player)>,
 ) {
     for (mut animation, input_vector, mut velocity, mut player) in query.iter_mut() {
-        if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::Attack) {
+        if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::ATTACK) {
             velocity.linvel = Vec2::ZERO;
 
             animation.travel(input_vector.0, "attack".to_string());
@@ -254,7 +265,7 @@ pub(crate) fn roll(
     mut query: Query<(&mut AnimationTree, &InputVector, &mut Velocity, &mut Player)>,
 ) {
     for (mut animation, input_vector, mut velocity, mut player) in query.iter_mut() {
-        if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::Roll) {
+        if player.state == PlayerState::MOVE && keyboard_input.just_active(Action::ROLL) {
             velocity.linvel = input_vector.0 * 120.;
 
             animation.travel(input_vector.0, "roll".to_string());

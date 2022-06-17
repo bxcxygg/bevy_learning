@@ -7,11 +7,13 @@ mod ysort;
 
 use crate::animation_tree::AnimationTreePlugin;
 use crate::character::CharacterPlugin;
+use crate::components::InputVector;
 use crate::world::WorldPlugin;
 use benimator::AnimationPlugin;
 use bevy::prelude::*;
 use bevy::winit::WinitSettings;
 use bevy_rapier2d::prelude::*;
+use ysort::YSortPlugin;
 
 fn main() {
     let mut app = App::new();
@@ -27,16 +29,14 @@ fn main() {
 
     #[cfg(feature = "editor_window")]
     {
-        use crate::components::InputVector;
         use bevy_editor_pls::EditorPlugin;
-        use bevy_inspector_egui::RegisterInspectable;
 
         app.add_plugin(EditorPlugin)
-            .register_inspectable::<InputVector>()
             .add_plugin(RapierDebugRenderPlugin::default());
     }
 
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+        .add_plugin(YSortPlugin)
         .add_plugin(AnimationPlugin::default())
         .add_plugin(AnimationTreePlugin)
         .add_plugin(GamePlugin)
@@ -50,7 +50,8 @@ struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(spawn_camera)
-            .add_startup_system(set_gravity);
+            .add_startup_system(set_gravity)
+            .register_type::<InputVector>();
     }
 }
 
