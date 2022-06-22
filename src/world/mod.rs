@@ -1,7 +1,5 @@
-use crate::App;
-use bevy::prelude::Plugin;
-use bevy_ecs_ldtk::prelude::RegisterLdtkObjects;
-use bevy_ecs_ldtk::{LdtkPlugin, LevelSelection};
+use bevy::prelude::{App, Plugin};
+use bevy_ecs_ldtk::{prelude::RegisterLdtkObjects, LdtkPlugin, LevelSelection};
 
 mod map;
 

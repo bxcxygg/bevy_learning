@@ -1,14 +1,17 @@
-use crate::animation_tree::*;
-use crate::components::InputVector;
-use crate::ysort::YSort;
+use std::time::Duration;
+
 use benimator::{Play, SpriteSheetAnimation};
-use bevy::prelude::*;
-use bevy::utils::HashMap;
+use bevy::{prelude::*, reflect::Reflect, utils::HashMap};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_input_actionmap::InputMap;
 use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
-use std::time::Duration;
+
+use crate::{
+    animation_tree::{Animation, AnimationNode, AnimationNodeMachine, AnimationTree},
+    components::InputVector,
+    ysort::YSort,
+};
 
 #[derive(Default, Eq, PartialEq, Clone, Reflect, Inspectable)]
 #[reflect_value(PartialEq)]

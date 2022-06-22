@@ -5,14 +5,13 @@ mod components;
 mod world;
 mod ysort;
 
-use crate::animation_tree::AnimationTreePlugin;
-use crate::character::CharacterPlugin;
-use crate::components::InputVector;
-use crate::world::WorldPlugin;
+use animation_tree::AnimationTreePlugin;
 use benimator::AnimationPlugin;
-use bevy::prelude::*;
-use bevy::winit::WinitSettings;
+use bevy::{prelude::*, winit::WinitSettings};
 use bevy_rapier2d::prelude::*;
+use character::CharacterPlugin;
+use components::InputVector;
+use world::WorldPlugin;
 use ysort::YSortPlugin;
 
 fn main() {

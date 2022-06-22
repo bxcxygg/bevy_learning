@@ -1,4 +1,3 @@
-use crate::Vec2;
 use benimator::{Play, SpriteSheetAnimation, SpriteSheetAnimationState};
 use bevy::prelude::*;
 use bevy::utils::HashMap;
